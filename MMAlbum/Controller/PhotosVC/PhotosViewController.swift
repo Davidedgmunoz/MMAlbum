@@ -15,9 +15,10 @@ class PhotosViewController: UIViewController,UICollectionViewDataSource,UICollec
     @IBOutlet weak var photosActivityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var albumaAcitivtyIndicator: UIActivityIndicatorView!
     
-    
+    var oldCellFrame : CGRect!
     let reusableCell = "albumCell"
     let reusablePhotoCell = "photoCell"
+    var currentPage = 1
     
     var albums = [Album]()
     var photos = [Photo]()
@@ -34,12 +35,31 @@ class PhotosViewController: UIViewController,UICollectionViewDataSource,UICollec
     }
 
     
-    fileprivate func getAlbums() {
-        apiService.getAlbums { (albums) in
-            self.albums = albums
+    func getAlbums() {
+        apiService.getAlbums(forPage: currentPage) { (albums) in
             DispatchQueue.main.async {
-                self.albumCollectionView.reloadData()
-                self.albumaAcitivtyIndicator.stopAnimating()
+
+                
+                if self.albums.count > 0 {
+                    CATransaction.begin()
+                    CATransaction.setDisableActions(true)
+                    
+                    self.albums = self.albums + albums
+                    let indexPaths = Array(((self.currentPage-1)*20)-1...(((self.currentPage-1)*20)+18)).map { IndexPath(item: $0, section: 0) }
+
+                    self.albumCollectionView?.insertItems(at: indexPaths)
+                    
+                    CATransaction.commit()
+                    
+                    
+                    self.albumCollectionView.scrollToItem(at: indexPaths.first!, at: .bottom , animated: true)
+                    
+                }else{
+                    self.albums.append(contentsOf:albums)
+                    self.albumCollectionView.reloadData()
+                    self.getPhotos(forAlbum: albums.first?.id ?? 1 )
+                    self.albumaAcitivtyIndicator.stopAnimating()
+                }
             }
         }
     }

@@ -14,7 +14,9 @@ extension PhotosViewController {
         if collectionView == photosCollectionView {
             return photos.count
         }
+        print("albums count : \(albums.count)")
         return albums.count
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -33,7 +35,6 @@ extension PhotosViewController {
         collectionCell.layer.shouldRasterize = true;
         collectionCell.layer.rasterizationScale = UIScreen.main.scale
         
-
         return collectionCell
     }
     
@@ -55,6 +56,7 @@ extension PhotosViewController {
             imageView.imageFromServerURL(urlString: photos[indexPath.row].url)
 
             let cellFrame = collectionView.convert(collectionView.cellForItem(at: indexPath)!.frame, to: self.view)
+            oldCellFrame = cellFrame;
             imageView.frame = cellFrame
             imageView.backgroundColor = .black
             imageView.contentMode = .scaleAspectFit
@@ -65,22 +67,39 @@ extension PhotosViewController {
             
             self.view.addSubview(imageView)
             
-            animation(imageview: imageView)
+            animationIn(imageview: imageView)
+            return
         }
         photosActivityIndicator.startAnimating()
         getPhotos(forAlbum : albums[indexPath.row].id)
     }
     
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if collectionView == albumCollectionView &&  indexPath.row == self.albums.count - 1 {
+            currentPage += 1
+            self.getAlbums()
+        }
+
+    }
     @objc func dismissFullscreenImage(_ sender: UITapGestureRecognizer) {
-        sender.view?.removeFromSuperview()
+        animationOut(imageview: sender.view! as! UIImageView)
     }
     
-    func animation(imageview : UIImageView){
+    func animationIn(imageview : UIImageView){
         UIView.animate(withDuration: 0.2, delay: 0.0, options: UIView.AnimationOptions.curveEaseOut, animations: {
-            // HERE
             imageview.frame = self.view.frame
             imageview.layoutIfNeeded()
         })
     }
 
+    func animationOut(imageview : UIImageView){
+        UIView.animate(withDuration: 0.2, delay: 0.0, options: UIView.AnimationOptions.curveEaseOut, animations: {
+            imageview.frame = self.oldCellFrame
+            imageview.layoutIfNeeded()
+            
+        }, completion: { (_) in
+            imageview.removeFromSuperview()
+        })
+    }
+    
 }

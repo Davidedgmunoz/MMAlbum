@@ -17,8 +17,8 @@ class AlbumAPIService: NSObject {
     
     
     
-    func getAlbums(completionHandler : @escaping ([Album])->Void){
-        AF.request("\(Constants.apiUrl)/albums").responseJSON { (response) in
+    func getAlbums(forPage page: Int,completionHandler : @escaping ([Album])->Void){
+        AF.request("\(Constants.apiUrl)/albums?_page=\(page)&_limit=20").responseJSON { (response) in
             print("Result: \(response.result)")                         // response serialization result
             
             if let jsonData = response.data {

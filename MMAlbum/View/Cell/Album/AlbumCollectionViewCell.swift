@@ -15,9 +15,12 @@ class AlbumCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.backgroundCustomView.layer.masksToBounds = true
-        self.backgroundCustomView.layer.cornerRadius = 6
+        self.layer.cornerRadius = 10
+        self.clipsToBounds = true
 
     }
 
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        return layoutAttributes
+    }
 }
